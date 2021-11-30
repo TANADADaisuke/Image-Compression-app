@@ -9,11 +9,6 @@ COMPRESE_RATE = 1.5
 COMPRESS_STEP = 0.5
 MEDIA_DIR = 'media'
 
-# get file size
-files = glob.glob('media/*.*')
-file_size = os.stat(files[0]).st_size
-print(files[0], ": ", file_size)
-
 
 def compress_files():
     """
@@ -22,33 +17,48 @@ def compress_files():
     Return: None
     """
     files = get_files()
-    pass
-# this is a simple script to quickly identify a set of image files:
-# for infile in sys.argv[1:]:
-#     try:
-#         with Image.open(infile) as im:
-#             print(infile, im.format, f'{im.size}x{im.mode}')
-#     except OSError:
-#         pass
+    
+    # iterate over files
+    for file in files:
+        # compress each file until the file size < 300kB
+        compress_file_recursive(file, COMPRESE_RATE)
+
+def compress_file_recursive(file, rate):
+    """
+    recursively compress file
+    
+    Return: None
+    """
+    compressed = compress_given_file(file, rate)
+    file_size = get_file_size(compressed)
+    if file_size > 300:
+        return compress_file_recursive(file, rate + COMPRESS_STEP)
+    print(f'{file} is compressed in {file_size}kB.')
 
 def compress_given_file(file, rate):
     """
     compress a given file with given rate
+    
+    Return: filename of compressed file
     """
-    pass
-# Geometrical transform:
-# compose_rate = 3
-# for infile in sys.argv[1:]:
-#     try:
-#         with Image.open(infile) as im:
-#             xsize = im.size[0] // compose_rate
-#             ysize = im.size[1] // compose_rate
-#             out = im.resize( (xsize, ysize) )
-#             print(f'{infile} is transformed in {xsize}x{ysize}')
-#             outfile = '_resized.'.join(infile.split('.'))
-#             out.save(outfile)
-#     except OSError:
-#         pass
+    try:
+        with Image.open(file) as im:
+            xsize = int(im.size[0] // rate)
+            ysize = int(im.size[1] // rate)
+            out = im.resize( (xsize, ysize) )
+            outfile = '_resized.'.join(file.split('.'))
+            out.save(outfile)
+            return outfile
+    except OSError:
+        print(f'Caution! {file} is not image format.')
+        return None
+
+def get_file_size(file):
+    """
+    Return: the size of file(kB/integer)
+    """
+    file_size = os.stat(file).st_size
+    return int(file_size) // 1000
 
 def get_files():
     """
