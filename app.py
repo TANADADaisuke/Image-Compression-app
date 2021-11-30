@@ -25,14 +25,19 @@ def compress_files():
 
 def compress_file_recursive(file, rate):
     """
-    recursively compress file
+    recursively compress file until the file size < 300kB
     
     Return: None
     """
     compressed = compress_given_file(file, rate)
+    # return None if the file is not image format
+    if not compressed:
+        return None
+    # check file size and call the function recursively
     file_size = get_file_size(compressed)
     if file_size > 300:
         return compress_file_recursive(file, rate + COMPRESS_STEP)
+    # finally announce the compressed file size
     print(f'{file} is compressed in {file_size}kB.')
 
 def compress_given_file(file, rate):
@@ -42,6 +47,7 @@ def compress_given_file(file, rate):
     Return: filename of compressed file
     """
     try:
+        # open image file and resize it
         with Image.open(file) as im:
             xsize = int(im.size[0] // rate)
             ysize = int(im.size[1] // rate)
@@ -50,6 +56,8 @@ def compress_given_file(file, rate):
             out.save(outfile)
             return outfile
     except OSError:
+        # if the file is not image format, print the causion message
+        # and return None
         print(f'Caution! {file} is not image format.')
         return None
 
