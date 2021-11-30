@@ -51,16 +51,20 @@ def compress_given_file(file, rate):
 #         pass
 
 def get_files():
-    pass
+    """
+    get all file in media folder
+    """
+    files = sorted(glob.glob(f'{MEDIA_DIR}/*.*'))
+    return files
 
 def main():
     """
     main function
     """
     # in case with sys args
-    if len(sys.args) == 2:
+    if len(sys.argv) == 2:
         compress_given_file(sys.args[1], sys.args[2])
-    elif len(sys.args) == 1:
+    elif len(sys.argv) == 1:
         compress_files()
     else:
         print(
@@ -69,4 +73,5 @@ def main():
         )
 
 
-
+if __name__ == '__main__':
+    main()
