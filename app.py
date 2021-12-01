@@ -94,6 +94,17 @@ def get_files():
     files = sorted(glob.glob(f'{MEDIA_DIR}/*.*'))
     return files
 
+def get_file_path(file):
+    """
+    get original file path
+    
+    Return: file path
+    """
+    file = file.replace('_resized', '')
+    for root, dirs, files in os.walk(MEDIA_DIR):
+        if file in files:
+            return os.path.join(root, file)
+
 def main():
     """
     main function
@@ -101,10 +112,26 @@ def main():
     # check if the original data store directory exists
     is_exist_original_directory()
     # in case with sys args
-    if len(sys.argv) == 2:
-        compress_given_file(sys.args[1], sys.args[2])
+    if len(sys.argv) == 3:
+        # retrieve file path and compress rate from sys.argv
+        file = get_file_path(sys.argv[1])
+        rate = float(sys.argv[2])
+        # try compressing image file
+        compressed = compress_given_file(file, rate)
+        if not compressed:
+            return None
+        # get file size and print it
+        file_size = get_file_size(compressed)
+        print(f'{file} is compressed in {file_size}kB')
+        # move compressed file into media folder
+        shutil.move(
+            compressed,
+            os.path.join(MEDIA_DIR, os.path.split(compressed)[1])
+        )
+    # in case with no args
     elif len(sys.argv) == 1:
         compress_files()
+    # otherwise, print caution message
     else:
         print(
             'Causion! App should run with no args or only with ' + \
