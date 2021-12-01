@@ -1,5 +1,6 @@
 import glob
 import os
+import shutil
 import sys
 from PIL import Image
 
@@ -8,7 +9,18 @@ from PIL import Image
 COMPRESE_RATE = 1.5
 COMPRESS_STEP = 0.5
 MEDIA_DIR = 'media'
+ORIGINAL_DIR = 'original'
 
+
+def is_exist_original_directory():
+    """
+    check if the original directory exist
+    
+    Return: None
+    """
+    original_dir = os.path.join(MEDIA_DIR, ORIGINAL_DIR)
+    if not os.path.exists(original_dir):
+        os.makedirs(original_dir)
 
 def compress_files():
     """
@@ -39,6 +51,13 @@ def compress_file_recursive(file, rate):
         return compress_file_recursive(file, rate + COMPRESS_STEP)
     # finally announce the compressed file size
     print(f'{file} is compressed in {file_size}kB.')
+    # move the origiinal file into original folder
+    target_path = os.path.join(
+        os.path.split(file)[0],
+        ORIGINAL_DIR,
+        os.path.split(file)[1]
+    )
+    shutil.move(file, target_path)
 
 def compress_given_file(file, rate):
     """
@@ -79,6 +98,8 @@ def main():
     """
     main function
     """
+    # check if the original data store directory exists
+    is_exist_original_directory()
     # in case with sys args
     if len(sys.argv) == 2:
         compress_given_file(sys.args[1], sys.args[2])
